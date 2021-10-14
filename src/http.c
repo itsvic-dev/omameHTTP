@@ -6,6 +6,7 @@
 #define ELVM_py "Python"
 #define ELVM_bf "Brainfuck"
 #define ELVM_bef "Befunge"
+#define ELVM_whirl "Whirl"
 
 #ifndef TARGET
 #define TARGET "Native"

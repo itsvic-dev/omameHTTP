@@ -7,12 +7,14 @@
 #define ELVM_bf "Brainfuck"
 #define ELVM_bef "Befunge"
 #define ELVM_whirl "Whirl"
+#define ELVM_java "Java"
+#define ELVM_scratch3 "Scratch 3.0" // it's abysmally slow but runs, surprisingly
 
 #ifndef TARGET
 #define TARGET "Native"
 #endif
 
-#define PARSER_VERSION "1.2"
+#define PARSER_VERSION "1.3"
 
 char* index_html = "<html><head><title>Hello!</title></head><body><p>Hello from %s!</p></body></html>";
 char* not_found_html = "<html><head><title>404 Not Found</title></head><body><h1>Not Found</h1></body></html>";
@@ -32,21 +34,22 @@ void http_respond() {
 		current_char ++; // this also functions as string length
 	}
 
-	int cmp = strncmp(request_buffer, "GET / HTTP/1.1", current_char - 2); // strip line endings, in worst case removes the leading 1
+	int method_cmp = strncmp(request_buffer, "GET ", 4);
+	int full_cmp = strncmp(request_buffer, "GET / HTTP/1.1", current_char - 2); // strip line endings, in worst case removes the leading 1
 	char* dataToPrint = index_html;
 
-	if (cmp == 0 && current_char > 1) {
+	if (full_cmp == 0 && current_char > 1 && method_cmp == 0) {
 		printf("HTTP/1.1 200 OK\r\n");
 	}
 
-	if (cmp > 0) {
-		printf("HTTP/1.1 404 Not Found\r\n");
-		dataToPrint = not_found_html;
-	}
-
-	if (cmp < 0 || current_char <= 1) {
+	else if (full_cmp < 0 || current_char <= 1 || method_cmp != 0) {
 		printf("HTTP/1.1 400 Bad Request\r\n");
 		dataToPrint = bad_request_html;
+	}
+
+	else if (full_cmp > 0) {
+		printf("HTTP/1.1 404 Not Found\r\n");
+		dataToPrint = not_found_html;
 	}
 
 	printf("Server: omameHTTP/%s (%s)\r\n", PARSER_VERSION, TARGET);
